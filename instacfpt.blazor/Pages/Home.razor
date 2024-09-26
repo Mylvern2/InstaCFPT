@@ -1,0 +1,52 @@
+﻿@code {
+    /*
+     * InstaCFPT
+     * Theo Neusser
+     * 29.08.2024
+     */
+}
+
+@page "/"
+<PageTitle>Home</PageTitle>
+
+<h1>InstaCFPT</h1>
+
+<InputFile OnChange="InputUpdated"/>
+<button @onclick="Uploading">Upload</button>
+
+<h2>@fileName</h2>
+<h2>@errorMessage</h2>
+
+
+@code {
+    IBrowserFile file = null;
+    private string fileName = "";
+    private string errorMessage = "";
+    private void InputUpdated(InputFileChangeEventArgs inputFileChangeEventArgs)
+    {
+        file = inputFileChangeEventArgs.File;
+        errorMessage = "";
+    }
+
+    private async void Uploading()
+    {
+        if (file == null)
+        {
+            errorMessage = "No file was selected, please try selecting one.";
+            return;
+        }
+
+
+        // Use multiform data
+
+        var content = new StreamContent(file.OpenReadStream(file.Size));
+        var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:32770/image/upload");
+        var mpcontent = new MultipartFormDataContent();
+        mpcontent.Add(content);
+        request.Content = mpcontent;
+        HttpClient client = new HttpClient();
+
+        var response = await client.SendAsync(request);
+    }
+
+}
