@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\InstaCFPT.API.props" />
+</Project>

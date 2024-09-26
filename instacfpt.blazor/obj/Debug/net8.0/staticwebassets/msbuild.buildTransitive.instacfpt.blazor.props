@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\instacfpt.blazor.props" />
+</Project>
