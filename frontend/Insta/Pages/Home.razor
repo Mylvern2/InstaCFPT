@@ -13,11 +13,18 @@
 else
 {
         <div class="container-fluid">
-            <div class="card-group row flex-row justify-content-between">
+            <div class="row flex-row justify-content-between">
             @foreach (var pub in lstPublications)
             {
+                if (Connected)
+                {
+                    if (pub.AuthorName != User.Name)
+                    {
+                        continue;
+                    }
+                }
 
-                        <div class="card d-flex center customer-card">
+                        <div class="card col-3 d-flex center customer-card">
                             <img class="card-img-top" src="/images/@pub.Image" alt="@pub.Image">
                             <div class="card-body d-flex flex-column justify-content-between">
                                 <h2 class="card-title"><a href="/publication?id=@pub.Id" class="text-decoration-none text-reset">@pub.Title</a></h2>
@@ -90,11 +97,7 @@ else
 
     public PublicationModel pubModel = new();
 
-    public UserModel testUser = new UserModel()
-        {
-            Id = "65aa4b7233e6098bd0650e84",
-            Name = "Alice"
-        };
+    public UserModel User = null;
 
     public List<UserModel> lstUsers = new List<UserModel>();
     public List<PublicationModel> lstPublications = new List<PublicationModel>();
@@ -120,7 +123,7 @@ else
         var body = new
         {
             publicationId = pub.Id,
-            userId = testUser.Id
+            userId = User.Id
         };
         var json = JsonConvert.SerializeObject(body);
         var data = new StringContent(json, Encoding.UTF8, "application/json");
@@ -172,7 +175,7 @@ else
         var body = new
         {
             publicationId = pub.Id,
-            userId = testUser.Id
+            userId = User.Id
         };
         var json = JsonConvert.SerializeObject(body);
         var data = new StringContent(json, Encoding.UTF8, "application/json");
@@ -207,18 +210,19 @@ else
     {
         if (!Connected)
         {
+            Console.WriteLine(User.Id);
             return;
         }
         var body = new
         {
             publicationId = pub.Id,
-            userId = testUser.Id,
+            userId = User.Id,
             // get the value of the textarea with the id of the publication
             text = (string)await JSRuntime.InvokeAsync<string>("eval", $"document.getElementById('{pub.Id}').value")
         };
         var json = JsonConvert.SerializeObject(body);
+        Console.WriteLine(User.Id);
         var data = new StringContent(json, Encoding.UTF8, "application/json");
-
         using var client = new HttpClient();
         try
         {
@@ -248,13 +252,19 @@ else
         DisplayAlert = false;
         try
         {
-            Connected = Convert.ToBoolean(await JSRuntime.InvokeAsync<String>("BlazorSetLocalStore", "Connected"));
+            Connected = Convert.ToBoolean(await JSRuntime.InvokeAsync<String>("BlazorGetLocalStore", "IsConnected"));
+            if (Connected)
+            {
+                User = new UserModel();
+                User.Name = await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "Username");
+                User.Id = await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "ID");
+            }
         }
         catch (Exception ex)
         {
             await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", "");
-            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Password", "");
-            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Connected", "false");
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "ID", "");
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "false");
             Connected = false;
 
         }

@@ -45,8 +45,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-
-        Connected = Convert.ToBoolean(await JSRuntime.InvokeAsync<String>("BlazorSetLocalStore", "Connected"));
+        Connected = Convert.ToBoolean(await JSRuntime.InvokeAsync<String>("BlazorGetLocalStore", "IsConnected"));
         Console.WriteLine("Init");
         StateHasChanged();
     }

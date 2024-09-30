@@ -53,14 +53,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        bool connected = Convert.ToBoolean(await JSRuntime.InvokeAsync<string>("BlazorSetLocalStore", "Connected"));
+        bool connected = Convert.ToBoolean(await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "IsConnected"));
 
         if (connected)
         {
-            Console.WriteLine(username);
             await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", "");
-            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Password", "");
-            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Connected", "false");
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "ID", "");
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "false");
             MyNavigationManager.NavigateTo("/");
         }
         StateHasChanged();
@@ -79,8 +78,9 @@
             if (user["name"] == loginModel.UserName && user["password"] == loginModel.Password)
             {
                 await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", loginModel.UserName);
-                await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Password", loginModel.Password);
-                await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Connected", true);
+                string id = user["_id"];
+                await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "ID", id);
+                await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "true");
                 MyNavigationManager.NavigateTo("/");
             }
             else
