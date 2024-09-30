@@ -1,0 +1,81 @@
+﻿@page "/publication"
+<main class="d-flex justify-content-center flex-wrap">
+<h2 class="w-100 text-center">Publication</h2>
+    @if (pub != null)
+    {
+                <div class="card d-flex center customer-card">
+                                <img class="card-img-top" src="/images/@pub.Image" alt="@pub.Image">
+                                <div class="card-body d-flex flex-column justify-content-between">
+                                    <h2 class="card-title"><a href="/publication?id=@pub.Id" class="text-decoration-none text-reset">@pub.Title</a></h2>
+                                    <h3 class="card-title text-muted"> @pub.AuthorName </h3>
+                                    <p class="card-text"> Bienvenue dans un coin enchanté de l'internet, où la magie de la nature rencontre les mélodies de l'imagination. Dans notre monde, les frontières entre le réel et l'irréel s'estompent doucement, laissant place à un espace où tout devient possible..</p>
+                                    @if (commentList.Count >= 1)
+                                    {
+                                        <h3 class="w-100 text-center">Comments</h3>
+                                        @foreach (CommentModel comment in commentList)
+                                        {
+                                            <h3>@comment.AuthorName:</h3>
+                                            <p>@comment.Content</p>
+                                        }
+                                    }
+                
+                                </div>
+
+
+
+
+                </div>
+
+
+
+    }
+</main>
+
+@code {
+    @inject NavigationManager MyNavigationManager
+    @inject IJSRuntime JSRuntime;
+    @using Newtonsoft.Json.Linq;
+    public PublicationModel pub = null;
+    public List<CommentModel> commentList = new List<CommentModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Get all publications
+        using var client = new HttpClient();
+        var response = await client.GetStringAsync("http://localhost:3000/publications");
+        JArray publications = JArray.Parse(response);
+        var URI = new UriBuilder(MyNavigationManager.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(URI.Query);
+        foreach (dynamic obj in publications)
+        {
+            if (obj["_id"] == query["id"])
+            {
+                Console.WriteLine("Good");
+                Console.WriteLine(obj);
+                pub = new PublicationModel();
+                pub.Id = obj["_id"];
+                pub.Title = obj["title"];
+                pub.Author = obj["author"];
+                pub.Image = obj["image"];
+
+                if (obj["comments"] != null)
+                {
+                    foreach (dynamic comment in obj["comments"])
+                    {
+                        commentList.Add(new CommentModel()
+                            {
+                                Author = comment["author"],
+                                Content = comment["text"],
+                                AuthorName = comment["authorName"]
+                            });
+
+                    }
+                }
+
+
+            }
+        }
+
+        StateHasChanged();
+    }
+}

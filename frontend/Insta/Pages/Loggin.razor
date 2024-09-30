@@ -1,0 +1,95 @@
+﻿@page "/loggin"
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Connectez-vous</h1>
+<h2>Version 10.03.2024</h2>
+
+<div class="card">
+    <div class="container">
+        <EditForm Model="@loginModel" OnValidSubmit="@HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <h3>UserName</h3>
+            <InputText type="text" id="userName" @bind-Value="loginModel.UserName" class="form-control" />
+            <br />
+            <h3>Password</h3>
+            <InputText type="password" id="password" @bind-Value="loginModel.Password" class="form-control" />
+            <br />
+            <br />
+            <button type="submit" class="w-100 btn btn-lg btn-outline-primary">Submit</button>
+            <ValidationSummary />
+
+            <p style="color:red;">
+                @error
+            </p>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+    @inject NavigationManager MyNavigationManager
+    @inject IJSRuntime JSRuntime;
+    @using System.Net.Http;
+    @using System.Net.Http.Json;
+    @using System.Text;
+    @using System.Web;
+    @using Newtonsoft.Json.Linq;
+    @using Newtonsoft.Json;
+    // dotnet add JSRuntime
+
+    private int currentCount = 0;
+
+    public LoginModel loginModel = new();
+
+    public string error = "";
+
+    private dynamic? username;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        bool connected = Convert.ToBoolean(await JSRuntime.InvokeAsync<string>("BlazorSetLocalStore", "Connected"));
+
+        if (connected)
+        {
+            Console.WriteLine(username);
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", "");
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Password", "");
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Connected", "false");
+            MyNavigationManager.NavigateTo("/");
+        }
+        StateHasChanged();
+
+    }
+
+    private async void HandleValidSubmit()
+    {
+        // Console.WriteLine(loginModel.UserName + loginModel.Password);
+        using var client = new HttpClient();
+        var response = await client.GetStringAsync("http://localhost:3000/users");
+        JArray users = JArray.Parse(response);
+
+        foreach (dynamic user in users)
+        {
+            if (user["name"] == loginModel.UserName && user["password"] == loginModel.Password)
+            {
+                await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", loginModel.UserName);
+                await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Password", loginModel.Password);
+                await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Connected", true);
+                MyNavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                error = "Username or password is invalid";
+                StateHasChanged();
+            }
+
+        }
+        // Console.WriteLine(loginModel.UserName + loginModel.Password);
+    }
+}

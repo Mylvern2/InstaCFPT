@@ -1,0 +1,28 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UserService = void 0;
+const main_1 = require("../main");
+const user_model_1 = require("../models/user.model");
+class UserService {
+    async getUsers() {
+        const userRepo = main_1.mongoDataSource.getRepository(user_model_1.User);
+        return userRepo.find();
+    }
+    async addUser(name) {
+        const userRepo = main_1.mongoDataSource.getRepository(user_model_1.User);
+        let user = new user_model_1.User();
+        user.name = name;
+        return userRepo.save(user);
+    }
+    async getUserName(userId) {
+        const userRepo = main_1.mongoDataSource.getRepository(user_model_1.User);
+        const user = await userRepo.findOne({ where: { _id: userId } });
+        if (!user || !user.name) {
+            console.log(user, userId);
+            return 'Unknown';
+        }
+        return user.name;
+    }
+}
+exports.UserService = UserService;
+//# sourceMappingURL=user.service.js.map

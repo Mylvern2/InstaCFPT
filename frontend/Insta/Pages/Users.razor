@@ -1,0 +1,62 @@
+﻿@page "/users"
+
+<PageTitle>Home</PageTitle>
+
+<h1>Bienvenu dans mon Insta Like</h1>
+<h2>Testing Front-end avec Blazor WebAssembly</h2>
+@if (lstUsers == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Id</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var current_user in lstUsers)
+            {
+                <tr>
+                    <td>  @current_user.Name</td>
+                    <td>  @current_user.Id</td>
+                </tr>
+
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    @using System.Net.Http;
+    @using System.Net.Http.Json;
+    @using System.Text;
+    @using System.Web;
+    @using Newtonsoft.Json.Linq;
+    @using Newtonsoft.Json;
+
+    public List<UserModel> lstUsers = new List<UserModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var client = new HttpClient();
+        var response = await client.GetStringAsync("http://localhost:3000/users");
+        JArray users = JArray.Parse(response);
+        foreach (dynamic obj in users)
+        {
+            Console.WriteLine(obj["name"]);
+            Console.WriteLine(obj["_id"]);
+
+            lstUsers.Add(new UserModel()
+                {
+                    Id = obj["_id"],
+                    Name = obj["name"]
+
+                });
+        }
+        StateHasChanged();
+    }
+}
