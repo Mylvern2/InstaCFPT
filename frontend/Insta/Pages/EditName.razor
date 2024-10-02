@@ -1,0 +1,114 @@
+﻿@page "/editname"
+
+<PageTitle>Edit Name</PageTitle>
+
+<h1>Edit your username</h1>
+<h2></h2>
+
+<div class="card">
+    <div class="container">
+        <EditForm Model="@editNameModel" OnValidSubmit="@HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <h3>Username</h3>
+            <InputText type="text" id="userName" @bind-Value="editNameModel.UserName" class="form-control"/>
+            <br />
+            <h3>New username</h3>
+            <InputText type="text" id="newName" @bind-Value="editNameModel.NewName" class="form-control"/>
+            <br />
+            <h3>Password</h3>
+            <InputText type="password" id="password" @bind-Value="editNameModel.Password" class="form-control" />
+            <br />
+            <br />
+            <button type="submit" class="w-100 btn btn-lg btn-outline-primary">Submit</button>
+            <ValidationSummary />
+            <p style="color:red;">
+                @error
+            </p>
+
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+    @inject NavigationManager MyNavigationManager
+    @inject IJSRuntime JSRuntime;
+    @using System.Net.Http;
+    @using System.Net.Http.Json;
+    @using System.Text;
+    @using System.Web;
+    @using Newtonsoft.Json.Linq;
+    @using Newtonsoft.Json;
+    // dotnet add JSRuntime
+
+    private int currentCount = 0;
+
+    public EditNameModel editNameModel = new();
+
+    public string error = "";
+
+    private dynamic? username;
+
+    protected override async Task OnInitializedAsync()
+    {
+        bool connected = Convert.ToBoolean(await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "IsConnected"));
+
+        if (!connected)
+        {
+            MyNavigationManager.NavigateTo("/");
+        }
+        StateHasChanged();
+
+    }
+
+    private async void HandleValidSubmit()
+    {
+        // Console.WriteLine(loginModel.UserName + loginModel.Password);
+        using var client = new HttpClient();
+        var response = await client.GetStringAsync("http://localhost:3000/users");
+        JArray users = JArray.Parse(response);
+
+        foreach (dynamic user in users)
+        {
+            if (user["name"] == editNameModel.UserName && user["password"] == editNameModel.Password)
+            {
+                string id = user["_id"];
+
+                await CallEditName(id, editNameModel.NewName);
+            }
+            else
+            {
+                StateHasChanged();
+
+            }
+
+        }
+        // Console.WriteLine(loginModel.UserName + loginModel.Password);
+    }
+
+
+    private async Task CallEditName(string id, string username)
+    {
+        using var client = new HttpClient();
+        var body = new
+        {
+            id = id,
+            username = username
+
+        };
+        var json = JsonConvert.SerializeObject(body);
+        var data = new StringContent(json, Encoding.UTF8, "application/json");
+        var response = await client.PatchAsync("http://localhost:3000/users/update", data);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Console.WriteLine(response.StatusCode);
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", username);
+            MyNavigationManager.NavigateTo("/profile");
+        }
+        else
+        {
+            Console.WriteLine(response.StatusCode);
+        }
+    }
+}

@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Post } from '@nestjs/common'
+import { Body, Controller, Get, Post, Patch } from '@nestjs/common'
+import { ObjectId } from 'mongodb'
 import { User } from 'src/models/user.model'
 import { UserService } from 'src/services/user.service'
 
@@ -19,5 +20,12 @@ export class UserController {
   @Post('add')
   async add(@Body() body): Promise<User> {
     return this.userService.addUser(body.name, body.password)
+  }
+
+  @Patch('update')
+  async editName(@Body() body) : Promise<User | boolean> {
+    const id = new ObjectId(body.id);
+    return this.userService.editName(id, body.username);
+
   }
 }

@@ -17,12 +17,21 @@ class UserService {
     }
     async getUserName(userId) {
         const userRepo = main_1.mongoDataSource.getRepository(user_model_1.User);
-        const user = await userRepo.findOne({ where: { _id: userId } });
+        const user = await userRepo.findOneBy({ _id: userId });
         if (!user || !user.name) {
-            console.log(user, userId);
             return 'Unknown';
         }
         return user.name;
+    }
+    async editName(userId, username) {
+        const userRepo = main_1.mongoDataSource.getRepository(user_model_1.User);
+        const user = await userRepo.findOneBy({ _id: userId });
+        console.log("test");
+        if (!user || !user.name) {
+            return false;
+        }
+        const result = await userRepo.update({ _id: userId }, { name: username });
+        return user;
     }
 }
 exports.UserService = UserService;

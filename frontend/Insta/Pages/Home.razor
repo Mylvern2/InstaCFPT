@@ -16,14 +16,6 @@ else
             <div class="row flex-row justify-content-between">
             @foreach (var pub in lstPublications)
             {
-                if (Connected)
-                {
-                    if (pub.AuthorName != User.Name)
-                    {
-                        continue;
-                    }
-                }
-
                         <div class="card col-3 d-flex center customer-card">
                             <img class="card-img-top" src="/images/@pub.Image" alt="@pub.Image">
                             <div class="card-body d-flex flex-column justify-content-between">

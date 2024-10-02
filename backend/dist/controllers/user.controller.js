@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const common_1 = require("@nestjs/common");
+const mongodb_1 = require("mongodb");
 const user_service_1 = require("../services/user.service");
 let UserController = class UserController {
     constructor(userService) {
@@ -31,6 +32,11 @@ let UserController = class UserController {
     async add(body) {
         return this.userService.addUser(body.name, body.password);
     }
+    async editName(body) {
+        console.log("test1");
+        const id = new mongodb_1.ObjectId(body.id);
+        return this.userService.editName(id, body.username);
+    }
 };
 exports.UserController = UserController;
 __decorate([
@@ -46,6 +52,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "add", null);
+__decorate([
+    (0, common_1.Patch)('update'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "editName", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [user_service_1.UserService])

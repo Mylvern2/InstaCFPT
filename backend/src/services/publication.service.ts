@@ -23,11 +23,6 @@ export class PublicationService {
       if (publication.comments === null || publication.comments === undefined) {
         publication.comments = []
       }
-
-      const testAuthorId = new ObjectId('65aa4b7233e6098bd0650e86');
-      console.log("LIGNE 24 : Test author id: " + testAuthorId);
-      const authorName = await this.getAuthorName(testAuthorId);
-      console.log("LIGNE 30 : Test author name: " + authorName);
       // si non, parcourir le tableau des commentaires et remplacer le id de l'autheur par le nom de l'auteur du commentaire
       for (let comment of publication.comments) {
         // faire une requette pour recuperer le nom de l'auteur du commentaire par son id qui se trouve dans le tableau des commentaires

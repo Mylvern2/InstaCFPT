@@ -18,10 +18,6 @@ class PublicationService {
             if (publication.comments === null || publication.comments === undefined) {
                 publication.comments = [];
             }
-            const testAuthorId = new mongodb_1.ObjectId('65aa4b7233e6098bd0650e86');
-            console.log("LIGNE 24 : Test author id: " + testAuthorId);
-            const authorName = await this.getAuthorName(testAuthorId);
-            console.log("LIGNE 30 : Test author name: " + authorName);
             for (let comment of publication.comments) {
                 comment.authorName = await this.getAuthorName(comment.author);
             }

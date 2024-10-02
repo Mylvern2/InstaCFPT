@@ -1,4 +1,4 @@
-import { ObjectId } from 'mongodb'
+import { ObjectId, MongoClient } from 'mongodb'
 import { mongoDataSource } from 'src/main'
 import { User } from 'src/models/user.model'
 
@@ -19,12 +19,25 @@ export class UserService {
 
   // get name of user by id
   async getUserName(userId: ObjectId): Promise<string> {
-    const userRepo = mongoDataSource.getRepository(User)
-    const user = await userRepo.findOne({ where: { _id: userId } })
-    if (!user || !user.name) {
-      console.log(user, userId);
-      return 'Unknown'
+    const userRepo = mongoDataSource.getRepository(User);
+    const user = await userRepo.findOneBy({_id: userId})
+    if (!user || !user.name)
+      {
+        return 'Unknown'
+      }
+      return user.name
+  }
+
+  async editName(userId: ObjectId, username: string) : Promise<boolean | User> {
+    const userRepo = mongoDataSource.getRepository(User);
+    const user = await userRepo.findOneBy({_id: userId})
+    console.log("test")
+    if (!user || !user.name)
+    {
+      return false;
     }
-    return user.name
+
+    const result = await userRepo.update({_id: userId}, {name: username});
+    return user;
   }
 }

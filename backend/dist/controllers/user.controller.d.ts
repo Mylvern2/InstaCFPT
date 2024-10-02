@@ -5,4 +5,5 @@ export declare class UserController {
     constructor(userService: UserService);
     findAll(): Promise<User[]>;
     add(body: any): Promise<User>;
+    editName(body: any): Promise<User | boolean>;
 }
