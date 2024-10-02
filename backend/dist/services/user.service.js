@@ -8,10 +8,11 @@ class UserService {
         const userRepo = main_1.mongoDataSource.getRepository(user_model_1.User);
         return userRepo.find();
     }
-    async addUser(name) {
+    async addUser(name, password) {
         const userRepo = main_1.mongoDataSource.getRepository(user_model_1.User);
         let user = new user_model_1.User();
         user.name = name;
+        user.password = password;
         return userRepo.save(user);
     }
     async getUserName(userId) {

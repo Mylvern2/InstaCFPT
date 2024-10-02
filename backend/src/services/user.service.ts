@@ -9,10 +9,11 @@ export class UserService {
     return userRepo.find()
   }
 
-  async addUser(name: string): Promise<User> {
+  async addUser(name: string, password: string): Promise<User> {
     const userRepo = mongoDataSource.getRepository(User)
     let user = new User()
     user.name = name
+    user.password = password;
     return userRepo.save(user)
   }
 

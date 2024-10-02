@@ -32,7 +32,7 @@ let UserController = class UserController {
         return users;
     }
     async add(body) {
-        return this.userService.addUser(body.name);
+        return this.userService.addUser(body.name, body.password);
     }
 };
 exports.UserController = UserController;

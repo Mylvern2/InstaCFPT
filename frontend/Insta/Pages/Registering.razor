@@ -1,0 +1,82 @@
+﻿@page "/register"
+
+<PageTitle>Registering</PageTitle>
+
+<h1>Create an account</h1>
+<h2>Version 02.10.2024</h2>
+
+<div class="card">
+    <div class="container">
+        <EditForm Model="@loginModel" OnValidSubmit="@HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <h3>UserName</h3>
+            <InputText type="text" id="userName" @bind-Value="loginModel.UserName" class="form-control" />
+            <br />
+            <h3>Password</h3>
+            <InputText type="password" id="password" @bind-Value="loginModel.Password" class="form-control" />
+            <br />
+            <br />
+            <button type="submit" class="w-100 btn btn-lg btn-outline-primary">Submit</button>
+            <a href="/loggin">Already have an account? Click here to login</a>
+            <ValidationSummary />
+            <p style="color:green;">
+                @success
+            </p>
+            <p style="color:red;">
+                @error
+            </p>
+            
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+    @inject NavigationManager MyNavigationManager
+    @inject IJSRuntime JSRuntime;
+    @using System.Net.Http;
+    @using System.Net.Http.Json;
+    @using System.Text;
+    @using System.Web;
+    @using Newtonsoft.Json.Linq;
+    @using Newtonsoft.Json;
+    // dotnet add JSRuntime
+
+    private int currentCount = 0;
+
+    public LoginModel loginModel = new();
+
+    public string success = "";
+
+    public string error = "";
+
+    private dynamic? username;
+
+    protected override async Task OnInitializedAsync()
+    {
+        bool connected = Convert.ToBoolean(await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "IsConnected"));
+
+        if (connected)
+        {
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", "");
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "ID", "");
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "false");
+            MyNavigationManager.NavigateTo("/");
+        }
+        StateHasChanged();
+
+    }
+
+    private async void HandleValidSubmit()
+    {
+        // Console.WriteLine(loginModel.UserName + loginModel.Password);
+
+
+        using var client = new HttpClient();
+        var response = await client.PostAsJsonAsync("http://localhost:3000/users/add", loginModel);
+        if (response.IsSuccessStatusCode)
+        {
+            success = "User created";
+        }
+    }
+}

@@ -1,6 +1,6 @@
 ﻿@page "/loggin"
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Login</PageTitle>
 
 <h1>Connectez-vous</h1>
 <h2>Version 10.03.2024</h2>
@@ -17,6 +17,7 @@
             <br />
             <br />
             <button type="submit" class="w-100 btn btn-lg btn-outline-primary">Submit</button>
+            <a href="/register">Not registered yet? Click here to do so.</a>
             <ValidationSummary />
 
             <p style="color:red;">
@@ -50,7 +51,7 @@
     {
         currentCount++;
     }
-
+    
     protected override async Task OnInitializedAsync()
     {
         bool connected = Convert.ToBoolean(await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "IsConnected"));
