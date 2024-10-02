@@ -6,4 +6,5 @@ export declare class UserController {
     findAll(): Promise<User[]>;
     add(body: any): Promise<User>;
     editName(body: any): Promise<User | boolean>;
+    deleteUser(id: string): Promise<boolean>;
 }

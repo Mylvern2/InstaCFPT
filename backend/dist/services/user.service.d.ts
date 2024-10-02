@@ -5,4 +5,5 @@ export declare class UserService {
     addUser(name: string, password: string): Promise<User>;
     getUserName(userId: ObjectId): Promise<string>;
     editName(userId: ObjectId, username: string): Promise<boolean | User>;
+    deleteUser(userId: ObjectId): Promise<boolean>;
 }

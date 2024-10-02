@@ -40,4 +40,11 @@ export class UserService {
     const result = await userRepo.update({_id: userId}, {name: username});
     return user;
   }
+
+  async deleteUser(userId: ObjectId) : Promise<boolean>
+  {
+    const userRepo = mongoDataSource.getRepository(User);
+    const result = await userRepo.delete({_id: userId})
+    return result.affected > 0;
+  }
 }

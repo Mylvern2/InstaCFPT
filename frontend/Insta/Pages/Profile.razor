@@ -54,6 +54,8 @@ else
 
 
 <a href="/editname"> <button class="btn btn-primary">Click here to change your username</button></a>
+<button class="btn btn-primary" @onclick="DeleteUser">Click here to delete your account</button>
+
 
 @code {
     @using Newtonsoft.Json.Linq;
@@ -104,6 +106,38 @@ else
                     LikesCount = obj["likes"].Count
 
                 });
+        }
+    }
+
+    private async void DeleteUser()
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+
+        if (confirmed)
+        {
+            using var client = new HttpClient();
+            string id = await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "ID");
+            var response = await client.DeleteAsync($"http://localhost:3000/users/delete/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var reader = new StreamReader(response.Content.ReadAsStream());
+                var content = await reader.ReadToEndAsync();
+                bool result = false;
+                bool.TryParse(content, out result);
+                if (result)
+                {
+                    await JSRuntime.InvokeVoidAsync("alert", "User deleted");
+                    await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", "");
+                    await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "ID", "");
+                    await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "false");
+                    MyNavigationManager.NavigateTo("/");
+                }
+
+            }
+
+
+
         }
     }
 }

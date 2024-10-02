@@ -33,9 +33,12 @@ let UserController = class UserController {
         return this.userService.addUser(body.name, body.password);
     }
     async editName(body) {
-        console.log("test1");
         const id = new mongodb_1.ObjectId(body.id);
         return this.userService.editName(id, body.username);
+    }
+    async deleteUser(id) {
+        const userId = new mongodb_1.ObjectId(id);
+        return this.userService.deleteUser(userId);
     }
 };
 exports.UserController = UserController;
@@ -59,6 +62,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "editName", null);
+__decorate([
+    (0, common_1.Delete)('delete/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "deleteUser", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [user_service_1.UserService])

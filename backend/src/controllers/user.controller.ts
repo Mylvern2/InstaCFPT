@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Patch } from '@nestjs/common'
+import { Body, Controller, Get, Post, Patch, Delete, Param } from '@nestjs/common'
 import { ObjectId } from 'mongodb'
 import { User } from 'src/models/user.model'
 import { UserService } from 'src/services/user.service'
@@ -26,6 +26,12 @@ export class UserController {
   async editName(@Body() body) : Promise<User | boolean> {
     const id = new ObjectId(body.id);
     return this.userService.editName(id, body.username);
+  }
 
+  @Delete('delete/:id')
+  async deleteUser(@Param('id') id: string) : Promise<boolean>
+  {
+    const userId = new ObjectId(id);
+    return this.userService.deleteUser(userId);
   }
 }

@@ -33,6 +33,11 @@ class UserService {
         const result = await userRepo.update({ _id: userId }, { name: username });
         return user;
     }
+    async deleteUser(userId) {
+        const userRepo = main_1.mongoDataSource.getRepository(user_model_1.User);
+        const result = await userRepo.delete({ _id: userId });
+        return result.affected > 0;
+    }
 }
 exports.UserService = UserService;
 //# sourceMappingURL=user.service.js.map
