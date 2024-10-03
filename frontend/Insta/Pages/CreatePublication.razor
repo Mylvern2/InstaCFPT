@@ -1,0 +1,147 @@
+﻿@page "/createpub"
+@* 
+    Théo Neusser
+    IDA-P4C
+    Atelier Prog
+    10.03.2024
+ *@
+<PageTitle>Create Publication</PageTitle>
+
+<h1>Create a publication</h1>
+<h2>Version 03.10.2024</h2>
+
+<div class="card">
+    <div class="container">
+        <EditForm Model="@publicationModel" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <h3>Title</h3>
+            <InputText type="text" id="title" @bind-Value="publicationModel.Title" class="form-control" />
+            <br />
+            <h3>Image</h3>
+            <InputFile id="image" accept=".png,.jpg,.jpeg,.webp" OnChange="OnFileChangeAsync"></InputFile>
+            <br />
+            <br />
+            <button type="submit" class="w-100 btn btn-lg btn-outline-primary">Create Publication</button>
+            <ValidationSummary />
+            <p style="color:green;">
+                @success
+            </p>
+            <p style="color:red;">
+                @error
+            </p>
+
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+    @inject NavigationManager MyNavigationManager
+    @inject IJSRuntime JSRuntime;
+    @using System.Net.Http;
+    @using System.Net.Http.Json;
+    @using System.Text;
+    @using System.Security.Permissions;
+    @using System.Security.Principal;
+    @using System.Web;
+    @using Newtonsoft.Json.Linq;
+    @using Newtonsoft.Json;
+    // dotnet add JSRuntime
+
+    private int currentCount = 0;
+
+    public PublicationModel publicationModel = new();
+
+    private IBrowserFile _image = null;
+    public string success = "";
+
+    public string error = "";
+
+    private bool _validImage = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        bool connected = Convert.ToBoolean(await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "IsConnected"));
+
+        if (!connected)
+        {
+            MyNavigationManager.NavigateTo("/");
+        }
+        StateHasChanged();
+
+    }
+
+    private async void HandleValidSubmit()
+    {
+        if (!_validImage)
+        {
+            error = "Image is not valid.";
+            return;
+        }
+        string id = await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "ID");
+        publicationModel.Author = id;
+        publicationModel.Image = $"/{_image.Name}";
+        PostPublication();
+
+    }
+
+    private async Task OnFileChangeAsync(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        string[] validTypes = new string[3] { "image/png", "image/jpeg", "image/webp" };
+
+        bool isImage = validTypes.Any(type => type == file.ContentType);
+
+        if (!isImage)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Please input a valid image. (Formats accepted: .png, .jpg/.jpeg, .webp)");
+            _validImage = false;
+            return;
+        }
+        _validImage = true;
+        _image = e.File;
+    }
+
+    private async Task SaveFile()
+    {
+        long maxBytesSize = 10_000_000; // 10 MB
+        using (Stream stream = _image.OpenReadStream(maxBytesSize))
+        {
+            string path = string.Format(@"C:\Users\Admin\Documents\images\{0}", _image.Name);
+            using (FileStream s = File.Create(path))
+            {
+                Console.WriteLine(s.Length);
+                await stream.CopyToAsync(s);
+                Console.WriteLine(s.Length);
+            }
+        }
+
+    }
+
+    private void CreateFile()
+    {
+        string path = string.Format(@"C:\Users\Admin\Documents\images\test.txt");
+        
+
+        byte[] buffer = Encoding.ASCII.GetBytes("Testing..... istg");
+        using (var stream = new FileStream(path, FileMode.Create))
+        {
+            stream.Write(buffer, 0, buffer.Length);
+        }
+
+    }
+
+    private void PostPublication()
+    {
+        using var client = new HttpClient();
+        // var response = await client.PostAsJsonAsync("http://localhost:3000/publications/add", publicationModel);
+        // if (response.IsSuccessStatusCode)
+        // {
+        //     await SaveFile();
+        //     MyNavigationManager.NavigateTo("/profile");
+        // }
+
+        CreateFile();
+    }
+}

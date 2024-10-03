@@ -1,11 +1,20 @@
 ﻿@page "/"
-
+@* 
+    Théo Neusser
+    IDA-P4C
+    Atelier Prog
+    10.03.2024
+ *@
 <PageTitle>CFPT-Insta</PageTitle>
 
 <h1>Nos publications</h1>
 
 <h2>V 10.03.2024</h2>
 
+@if (Connected)
+{
+        <a href="/createpub"><button class="btn btn-primary">Create Publication</button></a>
+}
 @if (lstPublications == null)
 {
         <p><em>Loading...</em></p>

@@ -19,14 +19,13 @@ class UserService {
         const userRepo = main_1.mongoDataSource.getRepository(user_model_1.User);
         const user = await userRepo.findOneBy({ _id: userId });
         if (!user || !user.name) {
-            return 'Unknown';
+            return 'Deleted User';
         }
         return user.name;
     }
     async editName(userId, username) {
         const userRepo = main_1.mongoDataSource.getRepository(user_model_1.User);
         const user = await userRepo.findOneBy({ _id: userId });
-        console.log("test");
         if (!user || !user.name) {
             return false;
         }

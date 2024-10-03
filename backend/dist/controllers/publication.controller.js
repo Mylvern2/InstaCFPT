@@ -23,7 +23,7 @@ let PublicationController = class PublicationController {
         return this.publicationService.getPublications();
     }
     async add(body) {
-        return this.publicationService.addPublication(body.publication.title, body.publication.author, body.publication.image);
+        return this.publicationService.addPublication(body.title, body.author, body.image);
     }
     async addComment(body) {
         try {
@@ -52,6 +52,7 @@ __decorate([
 ], PublicationController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Post)('add'),
+    (0, common_1.HttpCode)(201),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

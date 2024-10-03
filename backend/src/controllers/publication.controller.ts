@@ -4,7 +4,8 @@ import {
   Get,
   Post,
   Put,
-  Patch
+  Patch,
+  HttpCode
 } from '@nestjs/common';
 import { Publication } from 'src/models/publication.model'
 import { PublicationService } from 'src/services/publication.service'
@@ -19,8 +20,9 @@ export class PublicationController {
   }
 
   @Post('add')
+  @HttpCode(201)
   async add(@Body() body): Promise<Publication> {
-    return this.publicationService.addPublication(body.publication.title, body.publication.author, body.publication.image)
+    return this.publicationService.addPublication(body.title, body.author, body.image)
   }
 
   @Put('comment')

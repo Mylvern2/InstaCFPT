@@ -23,7 +23,7 @@ export class UserService {
     const user = await userRepo.findOneBy({_id: userId})
     if (!user || !user.name)
       {
-        return 'Unknown'
+        return 'Deleted User'
       }
       return user.name
   }
@@ -31,7 +31,6 @@ export class UserService {
   async editName(userId: ObjectId, username: string) : Promise<boolean | User> {
     const userRepo = mongoDataSource.getRepository(User);
     const user = await userRepo.findOneBy({_id: userId})
-    console.log("test")
     if (!user || !user.name)
     {
       return false;
