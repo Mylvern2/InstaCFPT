@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PublicationController = void 0;
 const common_1 = require("@nestjs/common");
+const mongodb_1 = require("mongodb");
 const publication_service_1 = require("../services/publication.service");
 let PublicationController = class PublicationController {
     constructor(publicationService) {
@@ -23,7 +24,14 @@ let PublicationController = class PublicationController {
         return this.publicationService.getPublications();
     }
     async add(body) {
-        return this.publicationService.addPublication(body.title, body.author, body.image);
+        return this.publicationService.addPublication(body.title, body.author, body.image, body.base64, body.path);
+    }
+    async editTitle(body) {
+        return this.publicationService.editTitle(body.id, body.title);
+    }
+    async deleteUser(id) {
+        const publicationId = new mongodb_1.ObjectId(id);
+        return this.publicationService.deletePublication(publicationId);
     }
     async addComment(body) {
         try {
@@ -58,6 +66,20 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], PublicationController.prototype, "add", null);
+__decorate([
+    (0, common_1.Patch)('editTitle'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PublicationController.prototype, "editTitle", null);
+__decorate([
+    (0, common_1.Delete)('delete/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], PublicationController.prototype, "deleteUser", null);
 __decorate([
     (0, common_1.Put)('comment'),
     __param(0, (0, common_1.Body)()),

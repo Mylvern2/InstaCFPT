@@ -1,18 +1,16 @@
 import { ObjectId } from 'mongodb'
 import { mongoDataSource } from 'src/main'
 import { Publication } from 'src/models/publication.model'
-import { User } from 'src/models/user.model'
-// import user.service.ts
 import { UserService } from 'src/services/user.service'
 import {Comment } from 'src/models/comment.model'
-import { Console } from 'console'
-
+import * as fs from 'fs'; 
 export class PublicationService {
 
   async getPublications(): Promise<Publication[]> {
     const PublicationRepo = mongoDataSource.getRepository(Publication)
     let publications = await PublicationRepo.find()
     for (let publication of publications) {
+      console.log(publication.author)
       publication.authorName = await this.getAuthorName(publication.author)
      // console.log("LIGNE 15 : Test this.getAuthorName(publication.author): " + publication.authorName);
       // si publication.likes est null ou undefined, initialiser à []
@@ -36,16 +34,40 @@ export class PublicationService {
     return publications
   }
 
-  async addPublication(title: string, author: ObjectId, image: string): Promise<Publication> {
+  async addPublication(title: string, author: ObjectId, image: string, content : string, path: string): Promise<Publication> {
     const publicationRepo = mongoDataSource.getRepository(Publication)
     let publication = new Publication()
     publication.title = title
-    publication.author = author
+    publication.author = new ObjectId(author)
     publication.image = image
     publication.authorName = await this.getAuthorName(author)
+
+    const buffer = Buffer.from(content, 'base64');
+    const fd = fs.openSync(path, "w");
+    const position = 0;
+    fs.writeSync(fd, buffer, position)
     return publicationRepo.save(publication)
   }
 
+  async editTitle(publicationId: ObjectId, title: string) : Promise<boolean | Publication>
+  {
+    const publicationRepo = mongoDataSource.getRepository(Publication);
+    const publication = await publicationRepo.findOneBy({_id: new ObjectId(publicationId)})
+    if (!publication)
+    {
+      return false;
+    }
+
+    await publicationRepo.update({_id: new ObjectId(publicationId)}, {title: title})
+    return publication
+  }
+
+  async deletePublication(publicationId: ObjectId) : Promise<boolean>
+  {
+    const publicationRepo = mongoDataSource.getRepository(Publication);
+    const result = await publicationRepo.delete({_id: publicationId})
+    return result.affected > 0;
+  }
 
   // get name of author from publication author id
   async getAuthorName(authorId: ObjectId): Promise<string> {

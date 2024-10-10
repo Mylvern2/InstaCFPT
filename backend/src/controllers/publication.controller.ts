@@ -5,8 +5,11 @@ import {
   Post,
   Put,
   Patch,
-  HttpCode
+  HttpCode,
+  Delete,
+  Param
 } from '@nestjs/common';
+import { ObjectId } from 'mongodb';
 import { Publication } from 'src/models/publication.model'
 import { PublicationService } from 'src/services/publication.service'
 
@@ -22,7 +25,20 @@ export class PublicationController {
   @Post('add')
   @HttpCode(201)
   async add(@Body() body): Promise<Publication> {
-    return this.publicationService.addPublication(body.title, body.author, body.image)
+    return this.publicationService.addPublication(body.title, body.author, body.image, body.base64, body.path)
+  }
+
+  @Patch('editTitle')
+  async editTitle(@Body() body)
+  {
+    return this.publicationService.editTitle(body.id, body.title)
+  }
+
+  @Delete('delete/:id')
+  async deleteUser(@Param('id') id: string) : Promise<boolean>
+  {
+    const publicationId = new ObjectId(id);
+    return this.publicationService.deletePublication(publicationId);
   }
 
   @Put('comment')

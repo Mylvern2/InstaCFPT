@@ -4,10 +4,11 @@ import { DataSource } from 'typeorm'
 import { User } from './models/user.model'
 import { Publication } from './models/publication.model'
 import { Comment } from './models/comment.model'
+import { urlencoded, json } from 'express';
 
 export const mongoDataSource = new DataSource({
   type: 'mongodb',
-  host: 'localhost',
+  host: '172.26.0.1',
   port: 27017,
   username: 'user',
   password: 'user',
@@ -28,7 +29,8 @@ mongoDataSource
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  app.use(urlencoded({extended:true, limit:'20mb'}))
+  app.use(json({limit:'20mb'}))
   app.enableCors({
     // Configuration CORS pour le serveur de développement
     // Ou spécifiez les origines que vous voulez autoriser, '*' pour toutes

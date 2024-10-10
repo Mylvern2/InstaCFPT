@@ -6,11 +6,13 @@ const main_1 = require("../main");
 const publication_model_1 = require("../models/publication.model");
 const user_service_1 = require("./user.service");
 const comment_model_1 = require("../models/comment.model");
+const fs = require("fs");
 class PublicationService {
     async getPublications() {
         const PublicationRepo = main_1.mongoDataSource.getRepository(publication_model_1.Publication);
         let publications = await PublicationRepo.find();
         for (let publication of publications) {
+            console.log(publication.author);
             publication.authorName = await this.getAuthorName(publication.author);
             if (publication.likes === null || publication.likes === undefined) {
                 publication.likes = [];
@@ -24,14 +26,32 @@ class PublicationService {
         }
         return publications;
     }
-    async addPublication(title, author, image) {
+    async addPublication(title, author, image, content, path) {
         const publicationRepo = main_1.mongoDataSource.getRepository(publication_model_1.Publication);
         let publication = new publication_model_1.Publication();
         publication.title = title;
-        publication.author = author;
+        publication.author = new mongodb_1.ObjectId(author);
         publication.image = image;
         publication.authorName = await this.getAuthorName(author);
+        const buffer = Buffer.from(content, 'base64');
+        const fd = fs.openSync(path, "w");
+        const position = 0;
+        fs.writeSync(fd, buffer, position);
         return publicationRepo.save(publication);
+    }
+    async editTitle(publicationId, title) {
+        const publicationRepo = main_1.mongoDataSource.getRepository(publication_model_1.Publication);
+        const publication = await publicationRepo.findOneBy({ _id: new mongodb_1.ObjectId(publicationId) });
+        if (!publication) {
+            return false;
+        }
+        await publicationRepo.update({ _id: new mongodb_1.ObjectId(publicationId) }, { title: title });
+        return publication;
+    }
+    async deletePublication(publicationId) {
+        const publicationRepo = main_1.mongoDataSource.getRepository(publication_model_1.Publication);
+        const result = await publicationRepo.delete({ _id: publicationId });
+        return result.affected > 0;
     }
     async getAuthorName(authorId) {
         const userService = new user_service_1.UserService();

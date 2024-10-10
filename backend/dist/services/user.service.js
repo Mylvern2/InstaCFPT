@@ -29,7 +29,7 @@ class UserService {
         if (!user || !user.name) {
             return false;
         }
-        const result = await userRepo.update({ _id: userId }, { name: username });
+        await userRepo.update({ _id: userId }, { name: username });
         return user;
     }
     async deleteUser(userId) {

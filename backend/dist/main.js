@@ -7,9 +7,10 @@ const typeorm_1 = require("typeorm");
 const user_model_1 = require("./models/user.model");
 const publication_model_1 = require("./models/publication.model");
 const comment_model_1 = require("./models/comment.model");
+const express_1 = require("express");
 exports.mongoDataSource = new typeorm_1.DataSource({
     type: 'mongodb',
-    host: 'localhost',
+    host: '172.26.0.1',
     port: 27017,
     username: 'user',
     password: 'user',
@@ -28,6 +29,8 @@ exports.mongoDataSource
 });
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    app.use((0, express_1.urlencoded)({ extended: true, limit: '20mb' }));
+    app.use((0, express_1.json)({ limit: '20mb' }));
     app.enableCors({
         origin: '*',
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',

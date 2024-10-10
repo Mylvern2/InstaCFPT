@@ -36,7 +36,7 @@ export class UserService {
       return false;
     }
 
-    const result = await userRepo.update({_id: userId}, {name: username});
+    await userRepo.update({_id: userId}, {name: username});
     return user;
   }
 

@@ -34,6 +34,18 @@
     </div>
 </div>
 
+<script type="text/javascript">
+    function saveFile(fileName, base64)
+    {
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = "data:application/octet-stream;base64," + base64;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
 
 @code {
     @inject NavigationManager MyNavigationManager
@@ -81,7 +93,9 @@
         string id = await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "ID");
         publicationModel.Author = id;
         publicationModel.Image = $"/{_image.Name}";
-        PostPublication();
+        byte[] buffer = await GetBuffer();
+        string base64 = Convert.ToBase64String(buffer);
+        PostPublication(_image.Name, base64);
 
     }
 
@@ -103,45 +117,44 @@
         _image = e.File;
     }
 
-    private async Task SaveFile()
+    private async Task<byte[]> GetBuffer()
     {
         long maxBytesSize = 10_000_000; // 10 MB
+
         using (Stream stream = _image.OpenReadStream(maxBytesSize))
         {
-            string path = string.Format(@"C:\Users\Admin\Documents\images\{0}", _image.Name);
-            using (FileStream s = File.Create(path))
+            using (var memoryStream = new MemoryStream())
             {
-                Console.WriteLine(s.Length);
-                await stream.CopyToAsync(s);
-                Console.WriteLine(s.Length);
+                await stream.CopyToAsync(memoryStream);
+                return memoryStream.ToArray();
             }
         }
 
     }
 
-    private void CreateFile()
-    {
-        string path = string.Format(@"C:\Users\Admin\Documents\images\test.txt");
-        
-
-        byte[] buffer = Encoding.ASCII.GetBytes("Testing..... istg");
-        using (var stream = new FileStream(path, FileMode.Create))
-        {
-            stream.Write(buffer, 0, buffer.Length);
-        }
-
-    }
-
-    private void PostPublication()
+    private async Task PostPublication(string fileName, string base64)
     {
         using var client = new HttpClient();
-        // var response = await client.PostAsJsonAsync("http://localhost:3000/publications/add", publicationModel);
-        // if (response.IsSuccessStatusCode)
-        // {
-        //     await SaveFile();
-        //     MyNavigationManager.NavigateTo("/profile");
-        // }
+        string path = string.Format(@"../frontend/Insta/wwwroot/images/{0}", fileName);
+        var pub = new Publication() { Title = publicationModel.Title, Author = publicationModel.Author, Image = publicationModel.Image, Base64 = base64, Path = path };
+        var response = await client.PostAsJsonAsync("http://localhost:3000/publications/add", pub);
+        if (response.IsSuccessStatusCode)
+        {
+            MyNavigationManager.NavigateTo("/profile");
+        }
+    }
 
-        CreateFile();
+    private class Publication
+    {
+        [JsonProperty("title")]
+        public string Title { get; set; }
+        [JsonProperty("author")]
+        public string Author { get; set; }
+        [JsonProperty("image")]
+        public string Image { get; set; }
+        [JsonProperty("base64")]
+        public string Base64 { get; set; }
+        [JsonProperty("path")]
+        public string Path { get; set; }
     }
 }

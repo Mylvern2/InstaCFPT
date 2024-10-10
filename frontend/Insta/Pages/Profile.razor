@@ -29,6 +29,14 @@ else
                                     <div class="card-body d-flex flex-column justify-content-between">
                                         <h2 class="card-title"><a href="/publication?id=@pub.Id" class="text-decoration-none text-reset">@pub.Title</a></h2>
                                         <h3 class="card-title text-muted"> @pub.AuthorName </h3>
+                                        <div>
+                                            <input type="text" @bind-value="updatedTitle">
+                                            <button class="btn btn-primary" @onclick="(() => { UpdateTitle(pub.Id);})">Edit publication title</button>
+                                        </div>
+                                        <button class="btn btn-primary" @onclick="(() => {DeletePublication(pub.Id);})">Delete publication title</button>
+
+                                        
+
                                         <p class="card-text"> Bienvenue dans un coin enchanté de l'internet, où la magie de la nature rencontre les mélodies de l'imagination. Dans notre monde, les frontières entre le réel et l'irréel s'estompent doucement, laissant place à un espace où tout devient possible..</p>
 
                                         <p class="card-text text-center">
@@ -64,6 +72,8 @@ else
 
 @code {
     @using Newtonsoft.Json.Linq;
+    @using Newtonsoft.Json;
+    @using System.Text;
     @inject IJSRuntime JSRuntime;
     @inject NavigationManager MyNavigationManager
 
@@ -74,6 +84,8 @@ else
 
     public string comment = "";
     public string addCommentMsg = "";
+
+    private string updatedTitle = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -144,5 +156,48 @@ else
 
 
         }
+    }
+
+    private async void DeletePublication(string id)
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+
+        if (confirmed)
+        {
+            using var client = new HttpClient();
+            var response = await client.DeleteAsync($"http://localhost:3000/publications/delete/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Publication deleted");
+            }
+
+
+
+        }
+    }
+
+    private async void UpdateTitle(string id)
+    {
+        if (updatedTitle.Trim() == "")
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Title field empty! Please fill in the new title to update your post.");
+            return;
+        }
+        using var client = new HttpClient();
+        var body = new
+        {
+            id = id,
+            title = updatedTitle
+
+        };
+        var json = JsonConvert.SerializeObject(body);
+        var data = new StringContent(json, Encoding.UTF8, "application/json");
+        var response = await client.PatchAsync("http://localhost:3000/publications/editTitle", data);
+        if (response.IsSuccessStatusCode)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Post updated!");
+        }
+
     }
 }
