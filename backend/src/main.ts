@@ -10,7 +10,7 @@ import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 export const mongoDataSource = new DataSource({
   type: 'mongodb',
-  host: 'localhost',
+  host: 'mongo',
   port: 27017,
   username: 'user',
   password: 'user',
