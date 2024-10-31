@@ -95,7 +95,7 @@
         publicationModel.Image = $"/{_image.Name}";
         byte[] buffer = await GetBuffer();
         string base64 = Convert.ToBase64String(buffer);
-        PostPublication(_image.Name, base64);
+        PostPublication(base64);
 
     }
 
@@ -117,6 +117,10 @@
         _image = e.File;
     }
 
+    /// <summary>
+    /// Gets the buffer out of the _image field
+    /// </summary>
+    /// <returns></returns>
     private async Task<byte[]> GetBuffer()
     {
         long maxBytesSize = 10_000_000; // 10 MB
@@ -131,19 +135,26 @@
         }
 
     }
-
-    private async Task PostPublication(string fileName, string base64)
+    /// <summary>
+    /// Calls the API to save the image back into the frontend
+    /// </summary>
+    /// <param name="fileName">name of the file</param>
+    /// <param name="base64">content of the image encoded in base64</param>
+    /// <returns></returns>
+    private async Task PostPublication(string base64)
     {
         using var client = new HttpClient();
-        string path = string.Format(@"../frontend/Insta/wwwroot/images/{0}", fileName);
-        var pub = new Publication() { Title = publicationModel.Title, Author = publicationModel.Author, Image = publicationModel.Image, Base64 = base64, Path = path };
+        var pub = new Publication() { Title = publicationModel.Title, Author = publicationModel.Author, Image = publicationModel.Image, Base64 = base64};
         var response = await client.PostAsJsonAsync("http://localhost:3000/publications/add", pub);
         if (response.IsSuccessStatusCode)
         {
             MyNavigationManager.NavigateTo("/profile");
         }
-    }
+    }   
 
+    /// <summary>
+    /// Custom private class to parse into json
+    /// </summary>
     private class Publication
     {
         [JsonProperty("title")]
@@ -154,7 +165,5 @@
         public string Image { get; set; }
         [JsonProperty("base64")]
         public string Base64 { get; set; }
-        [JsonProperty("path")]
-        public string Path { get; set; }
     }
 }

@@ -57,7 +57,7 @@
     protected override async Task OnInitializedAsync()
     {
         bool connected = Convert.ToBoolean(await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "IsConnected"));
-
+        // redirects user to home page if not connected
         if (!connected)
         {
             MyNavigationManager.NavigateTo("/");
@@ -68,7 +68,6 @@
 
     private async void HandleValidSubmit()
     {
-        // Console.WriteLine(loginModel.UserName + loginModel.Password);
         using var client = new HttpClient();
         var response = await client.GetStringAsync("http://localhost:3000/users");
         JArray users = JArray.Parse(response);
@@ -88,10 +87,14 @@
             }
 
         }
-        // Console.WriteLine(loginModel.UserName + loginModel.Password);
     }
 
-
+    /// <summary>
+    /// Calls the API to change the user's name
+    /// </summary>
+    /// <param name="id">userId</param>
+    /// <param name="username"></param>
+    /// <returns></returns>
     private async Task CallEditName(string id, string username)
     {
         using var client = new HttpClient();

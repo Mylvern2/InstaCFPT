@@ -51,10 +51,9 @@ else
         using var client = new HttpClient();
         var response = await client.GetStringAsync("http://localhost:3000/users");
         JArray users = JArray.Parse(response);
+        // Get all users and add them to a list
         foreach (dynamic obj in users)
         {
-            Console.WriteLine(obj["name"]);
-            Console.WriteLine(obj["_id"]);
 
             lstUsers.Add(new UserModel()
                 {

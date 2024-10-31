@@ -51,14 +51,15 @@
         using var client = new HttpClient();
         var response = await client.GetStringAsync("http://localhost:3000/publications");
         JArray publications = JArray.Parse(response);
+        // Get the id in the URL
         var URI = new UriBuilder(MyNavigationManager.Uri);
         var query = System.Web.HttpUtility.ParseQueryString(URI.Query);
         foreach (dynamic obj in publications)
         {
+            // if the id is correct
             if (obj["_id"] == query["id"])
             {
-                Console.WriteLine("Good");
-                Console.WriteLine(obj);
+                // Create a publication and its comments
                 pub = new PublicationModel();
                 pub.Id = obj["_id"];
                 pub.Title = obj["title"];

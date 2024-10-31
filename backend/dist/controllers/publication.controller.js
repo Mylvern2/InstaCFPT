@@ -24,7 +24,7 @@ let PublicationController = class PublicationController {
         return this.publicationService.getPublications();
     }
     async add(body) {
-        return this.publicationService.addPublication(body.title, body.author, body.image, body.base64, body.path);
+        return this.publicationService.addPublication(body.title, body.author, body.image, body.base64);
     }
     async editTitle(body) {
         return this.publicationService.editTitle(body.id, body.title);

@@ -64,6 +64,7 @@
 
         if (connected)
         {
+            // if user is connected, logs them out
             await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", "");
             await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "ID", "");
             await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "false");
@@ -75,15 +76,16 @@
 
     private async void HandleValidSubmit()
     {
-        // Console.WriteLine(loginModel.UserName + loginModel.Password);
         using var client = new HttpClient();
         var response = await client.GetStringAsync("http://localhost:3000/users");
         JArray users = JArray.Parse(response);
 
         foreach (dynamic user in users)
         {
+            // If username and password match
             if (user["name"] == loginModel.UserName && user["password"] == loginModel.Password)
             {
+                // connect the user
                 await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", loginModel.UserName);
                 string id = user["_id"];
                 await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "ID", id);
@@ -97,6 +99,5 @@
             }
 
         }
-        // Console.WriteLine(loginModel.UserName + loginModel.Password);
     }
 }

@@ -25,7 +25,7 @@ export class PublicationController {
   @Post('add')
   @HttpCode(201)
   async add(@Body() body): Promise<Publication> {
-    return this.publicationService.addPublication(body.title, body.author, body.image, body.base64, body.path)
+    return this.publicationService.addPublication(body.title, body.author, body.image, body.base64)
   }
 
   @Patch('editTitle')

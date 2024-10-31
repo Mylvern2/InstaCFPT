@@ -5,10 +5,12 @@ import { User } from './models/user.model'
 import { Publication } from './models/publication.model'
 import { Comment } from './models/comment.model'
 import { urlencoded, json } from 'express';
+import { join } from 'path';
 
+import { NestExpressApplication } from '@nestjs/platform-express';
 export const mongoDataSource = new DataSource({
   type: 'mongodb',
-  host: '172.26.0.1',
+  host: 'localhost',
   port: 27017,
   username: 'user',
   password: 'user',
@@ -28,7 +30,7 @@ mongoDataSource
   })
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.use(urlencoded({extended:true, limit:'20mb'}))
   app.use(json({limit:'20mb'}))
   app.enableCors({
@@ -41,7 +43,8 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type, Accept',
     credentials: true, // Important si vous envoyez des requêtes avec des credentials comme des cookies
   });
-
+  app.useStaticAssets(join(__dirname, '..', 'images'));
+  console.log("Cors enabled")
   await app.listen(3000);
 }
 

@@ -1,0 +1,42 @@
+services:
+  mongo:
+    image: mongo
+    container_name: mongo
+    restart: "no"
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo/datadb:/data/db 
+      - ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGO_INITDB_DATABASE: testdb
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    restart: "no"
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+      ME_CONFIG_MONGODB_URL: mongodb://admin:admin@mongo:27017/
+
+  backend:
+    build:
+      context: ./backend/
+    container_name: backend
+    ports:
+      - 3000:3000
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: ./frontend/Insta/
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports: 
+      - 80:80

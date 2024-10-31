@@ -75,9 +75,6 @@
 
     private async void HandleValidSubmit()
     {
-        // Console.WriteLine(loginModel.UserName + loginModel.Password);
-
-
         using var client = new HttpClient();
         var response = await client.PostAsJsonAsync("http://localhost:3000/users/add", loginModel);
         if (response.IsSuccessStatusCode)

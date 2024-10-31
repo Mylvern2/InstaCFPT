@@ -26,7 +26,7 @@ class PublicationService {
         }
         return publications;
     }
-    async addPublication(title, author, image, content, path) {
+    async addPublication(title, author, image, content) {
         const publicationRepo = main_1.mongoDataSource.getRepository(publication_model_1.Publication);
         let publication = new publication_model_1.Publication();
         publication.title = title;
@@ -34,7 +34,7 @@ class PublicationService {
         publication.image = image;
         publication.authorName = await this.getAuthorName(author);
         const buffer = Buffer.from(content, 'base64');
-        const fd = fs.openSync(path, "w");
+        const fd = fs.openSync(`images${image}`, "w");
         const position = 0;
         fs.writeSync(fd, buffer, position);
         return publicationRepo.save(publication);

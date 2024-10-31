@@ -8,9 +8,10 @@ const user_model_1 = require("./models/user.model");
 const publication_model_1 = require("./models/publication.model");
 const comment_model_1 = require("./models/comment.model");
 const express_1 = require("express");
+const path_1 = require("path");
 exports.mongoDataSource = new typeorm_1.DataSource({
     type: 'mongodb',
-    host: '172.26.0.1',
+    host: 'localhost',
     port: 27017,
     username: 'user',
     password: 'user',
@@ -37,6 +38,8 @@ async function bootstrap() {
         allowedHeaders: 'Content-Type, Accept',
         credentials: true,
     });
+    app.useStaticAssets((0, path_1.join)(__dirname, '..', 'images'));
+    console.log("Cors enabled");
     await app.listen(3000);
 }
 bootstrap();
