@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
-const main_1 = require("../main");
-const user_model_1 = require("../models/user.model");
+const main_1 = require("src/main");
+const user_model_1 = require("src/models/user.model");
 class UserService {
     async getUsers() {
         const userRepo = main_1.mongoDataSource.getRepository(user_model_1.User);
@@ -14,6 +14,11 @@ class UserService {
         user.name = name;
         user.password = password;
         return userRepo.save(user);
+    }
+    async getUser(username) {
+        const userRepo = main_1.mongoDataSource.getRepository(user_model_1.User);
+        const user = await userRepo.findOneBy({ name: username });
+        return user;
     }
     async getUserName(userId) {
         const userRepo = main_1.mongoDataSource.getRepository(user_model_1.User);

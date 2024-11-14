@@ -11,7 +11,7 @@ const express_1 = require("express");
 const path_1 = require("path");
 exports.mongoDataSource = new typeorm_1.DataSource({
     type: 'mongodb',
-    host: 'localhost',
+    host: 'mongo',
     port: 27017,
     username: 'user',
     password: 'user',

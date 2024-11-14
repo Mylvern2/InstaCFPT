@@ -17,6 +17,13 @@ export class UserService {
     return userRepo.save(user)
   }
 
+  async getUser(username: string) : Promise<User> | null {
+    const userRepo = mongoDataSource.getRepository(User);
+    const user = await userRepo.findOneBy({name: username});
+
+    return user;
+  }
+
   // get name of user by id
   async getUserName(userId: ObjectId): Promise<string> {
     const userRepo = mongoDataSource.getRepository(User);

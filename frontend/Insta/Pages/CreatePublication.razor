@@ -58,6 +58,7 @@
     @using System.Web;
     @using Newtonsoft.Json.Linq;
     @using Newtonsoft.Json;
+    @using System.Net.Http.Headers;
     // dotnet add JSRuntime
 
     private int currentCount = 0;
@@ -145,7 +146,11 @@
     {
         using var client = new HttpClient();
         var pub = new Publication() { Title = publicationModel.Title, Author = publicationModel.Author, Image = publicationModel.Image, Base64 = base64};
-        var response = await client.PostAsJsonAsync("http://localhost:3000/publications/add", pub);
+        using var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:3000/publications/add");
+        string token = await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "token");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        request.Content = new StringContent(JsonConvert.SerializeObject(pub));
+        var response = await client.SendAsync(request);
         if (response.IsSuccessStatusCode)
         {
             MyNavigationManager.NavigateTo("/profile");

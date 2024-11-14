@@ -32,6 +32,8 @@ services:
       - 3000:3000
     volumes: 
       - ./backend/images:/app/images
+      - ./backend/node_modules:/app/node_modules
+      - ./backend/src:/app/src
     depends_on:
       - mongo
 

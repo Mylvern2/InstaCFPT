@@ -40,7 +40,7 @@ async function bootstrap() {
     // origin: 'http://localhost:8080', // port nginx
     // origin: 'https://localhost:7197', // port blazor
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Accept',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
     credentials: true, // Important si vous envoyez des requêtes avec des credentials comme des cookies
   });
   app.useStaticAssets(join(__dirname, '..', 'images'));

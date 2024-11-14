@@ -36,7 +36,7 @@ export class PublicationService {
 
   async addPublication(title: string, author: ObjectId, image: string, content : string): Promise<Publication> {
     const publicationRepo = mongoDataSource.getRepository(Publication)
-    let publication = new Publication()
+    const publication = new Publication()
     publication.title = title
     publication.author = new ObjectId(author)
     publication.image = image

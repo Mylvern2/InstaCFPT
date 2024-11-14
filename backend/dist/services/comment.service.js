@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommentService = void 0;
-const main_1 = require("../main");
-const comment_model_1 = require("../models/comment.model");
+const main_1 = require("src/main");
+const comment_model_1 = require("src/models/comment.model");
 class CommentService {
     async getComments() {
         const CommentRepo = main_1.mongoDataSource.getRepository(comment_model_1.Comment);

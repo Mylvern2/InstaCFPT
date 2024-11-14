@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Patch, Delete, Param } from '@nestjs/common'
+import { Body, Controller, Get, Post, Patch, Delete, Param, Header, Req } from '@nestjs/common'
 import { ObjectId } from 'mongodb'
 import { User } from 'src/models/user.model'
 import { UserService } from 'src/services/user.service'
@@ -17,6 +17,11 @@ export class UserController {
     return users
   }
 
+  @Get(':name')
+  async findIdByName(@Param('name') name: string) : Promise<string> {
+    return (await this.userService.getUser(name))._id.toString();
+  }
+
   @Post('add')
   async add(@Body() body): Promise<User> {
     return this.userService.addUser(body.name, body.password)
@@ -29,7 +34,7 @@ export class UserController {
   }
 
   @Delete('delete/:id')
-  async deleteUser(@Param('id') id: string) : Promise<boolean>
+  async deleteUser(@Param('id') id: string, @Req() request: Request) : Promise<boolean>
   {
     const userId = new ObjectId(id);
     return this.userService.deleteUser(userId);

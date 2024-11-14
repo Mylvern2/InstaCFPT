@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PublicationController = void 0;
 const common_1 = require("@nestjs/common");
 const mongodb_1 = require("mongodb");
-const publication_service_1 = require("../services/publication.service");
+const publication_service_1 = require("src/services/publication.service");
 let PublicationController = class PublicationController {
     constructor(publicationService) {
         this.publicationService = publicationService;

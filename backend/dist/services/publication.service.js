@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PublicationService = void 0;
 const mongodb_1 = require("mongodb");
-const main_1 = require("../main");
-const publication_model_1 = require("../models/publication.model");
-const user_service_1 = require("./user.service");
-const comment_model_1 = require("../models/comment.model");
+const main_1 = require("src/main");
+const publication_model_1 = require("src/models/publication.model");
+const user_service_1 = require("src/services/user.service");
+const comment_model_1 = require("src/models/comment.model");
 const fs = require("fs");
 class PublicationService {
     async getPublications() {
@@ -28,13 +28,13 @@ class PublicationService {
     }
     async addPublication(title, author, image, content) {
         const publicationRepo = main_1.mongoDataSource.getRepository(publication_model_1.Publication);
-        let publication = new publication_model_1.Publication();
+        const publication = new publication_model_1.Publication();
         publication.title = title;
         publication.author = new mongodb_1.ObjectId(author);
         publication.image = image;
         publication.authorName = await this.getAuthorName(author);
         const buffer = Buffer.from(content, 'base64');
-        const fd = fs.openSync(`images${image}`, "w");
+        const fd = fs.openSync(`images/${image}`, "w");
         const position = 0;
         fs.writeSync(fd, buffer, position);
         return publicationRepo.save(publication);

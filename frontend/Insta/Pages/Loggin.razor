@@ -1,5 +1,5 @@
 ﻿@page "/loggin"
-@* 
+@*
     Théo Neusser
     IDA-P4C
     Atelier Prog
@@ -57,7 +57,7 @@
     {
         currentCount++;
     }
-    
+
     protected override async Task OnInitializedAsync()
     {
         bool connected = Convert.ToBoolean(await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "IsConnected"));
@@ -77,27 +77,27 @@
     private async void HandleValidSubmit()
     {
         using var client = new HttpClient();
-        var response = await client.GetStringAsync("http://localhost:3000/users");
-        JArray users = JArray.Parse(response);
 
-        foreach (dynamic user in users)
+        var response = await client.PostAsJsonAsync("http://localhost:3000/login", loginModel);
+
+        // If username and password match
+        if (response.IsSuccessStatusCode)
         {
-            // If username and password match
-            if (user["name"] == loginModel.UserName && user["password"] == loginModel.Password)
-            {
-                // connect the user
-                await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", loginModel.UserName);
-                string id = user["_id"];
-                await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "ID", id);
-                await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "true");
-                MyNavigationManager.NavigateTo("/");
-            }
-            else
-            {
-                error = "Username or password is invalid";
-                StateHasChanged();
-            }
+            string token = await response.Content.ReadAsStringAsync();
+            // connect the user
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", loginModel.UserName);
 
+            string id = await client.GetStringAsync($"http://localhost:3000/users/{loginModel.UserName}");
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "ID", id);
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "true");
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "token", token);
+            MyNavigationManager.NavigateTo("/");
         }
+        else
+        {
+            error = "Username or password is invalid";
+            StateHasChanged();
+        }
+
     }
 }

@@ -7,15 +7,19 @@ import {
   Patch,
   HttpCode,
   Delete,
-  Param
+  Param,
+  Req,
+  HttpException,
+  HttpStatus
 } from '@nestjs/common';
 import { ObjectId } from 'mongodb';
 import { Publication } from 'src/models/publication.model'
+import { LoginService } from 'src/services/login.service';
 import { PublicationService } from 'src/services/publication.service'
 
 @Controller('publications')
 export class PublicationController {
-  constructor(private readonly publicationService: PublicationService) { }
+  constructor(private readonly publicationService: PublicationService, private readonly loginService: LoginService) { }
 
   @Get()
   findAll(): Promise<Publication[]> {
@@ -24,7 +28,11 @@ export class PublicationController {
 
   @Post('add')
   @HttpCode(201)
-  async add(@Body() body): Promise<Publication> {
+  async add(@Body() body, @Req() request: Request): Promise<Publication> {
+    if (!this.loginService.verifyJWT(request))
+    {
+      throw new HttpException("Not Authentified", HttpStatus.UNAUTHORIZED)
+    }
     return this.publicationService.addPublication(body.title, body.author, body.image, body.base64)
   }
 
