@@ -65,8 +65,7 @@
         if (connected)
         {
             // if user is connected, logs them out
-            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", "");
-            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "ID", "");
+            await JSRuntime.InvokeVoidAsync("BlazorRemoveLocalStore", "token");
             await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "false");
             MyNavigationManager.NavigateTo("/");
         }
@@ -78,17 +77,14 @@
     {
         using var client = new HttpClient();
 
-        var response = await client.PostAsJsonAsync("http://localhost:3000/login", loginModel);
+        var response = await client.PostAsJsonAsync("http://api.instacfpt.info/login", loginModel);
 
         // If username and password match
         if (response.IsSuccessStatusCode)
         {
             string token = await response.Content.ReadAsStringAsync();
             // connect the user
-            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", loginModel.UserName);
 
-            string id = await client.GetStringAsync($"http://localhost:3000/users/{loginModel.UserName}");
-            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "ID", id);
             await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "true");
             await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "token", token);
             MyNavigationManager.NavigateTo("/");

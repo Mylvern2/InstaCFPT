@@ -12,6 +12,8 @@ namespace Insta
         public string Id { get; set; }
         [JsonProperty("title")]
         public string Title { get; set; }
+        [JsonProperty("content")]
+        public string Content { get; set; }
         [JsonProperty("author")]
         public string Author { get; set; }
         [JsonProperty("image")]

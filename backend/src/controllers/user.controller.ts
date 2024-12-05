@@ -1,11 +1,12 @@
-import { Body, Controller, Get, Post, Patch, Delete, Param, Header, Req } from '@nestjs/common'
+import { Body, Controller, Get, Post, Patch, Delete, Param, Header, Req, HttpException, HttpStatus } from '@nestjs/common'
 import { ObjectId } from 'mongodb'
 import { User } from 'src/models/user.model'
+import { LoginService } from 'src/services/login.service'
 import { UserService } from 'src/services/user.service'
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService, private readonly loginService: LoginService) {}
   @Get()
   async findAll(): Promise<User[]> {
     console.log('controler @GET : findAll() get users')
@@ -28,15 +29,27 @@ export class UserController {
   }
 
   @Patch('update')
-  async editName(@Body() body) : Promise<User | boolean> {
-    const id = new ObjectId(body.id);
-    return this.userService.editName(id, body.username);
+  async editName(@Body() body, @Req() request: Request) : Promise<User | boolean> {
+    const decoded = this.loginService.verifyJWT(request);
+    if (decoded === null)
+    {
+      throw new HttpException("Not Authentified", HttpStatus.UNAUTHORIZED)
+    }
+    return this.userService.editName(decoded.id, body.username);
   }
 
-  @Delete('delete/:id')
-  async deleteUser(@Param('id') id: string, @Req() request: Request) : Promise<boolean>
+  @Delete('delete')
+  async deleteUser(@Req() request: Request) : Promise<void>
   {
-    const userId = new ObjectId(id);
-    return this.userService.deleteUser(userId);
+    const decoded = this.loginService.verifyJWT(request);
+    if (decoded === null)
+    {
+      throw new HttpException("Not Authentified", HttpStatus.UNAUTHORIZED)
+    }
+    console.log(decoded.id)
+    if (!this.userService.deleteUser(decoded.id))
+    {
+      throw new HttpException("User not found", HttpStatus.BAD_REQUEST);
+    }
   }
 }

@@ -69,16 +69,15 @@
     private async void HandleValidSubmit()
     {
         using var client = new HttpClient();
-        var response = await client.GetStringAsync("http://localhost:3000/users");
+        var response = await client.GetStringAsync("http://api.instacfpt.info/users");
         JArray users = JArray.Parse(response);
 
         foreach (dynamic user in users)
         {
             if (user["name"] == editNameModel.UserName && user["password"] == editNameModel.Password)
             {
-                string id = user["_id"];
-
-                await CallEditName(id, editNameModel.NewName);
+                await CallEditName(editNameModel.NewName);
+                
             }
             else
             {
@@ -95,24 +94,41 @@
     /// <param name="id">userId</param>
     /// <param name="username"></param>
     /// <returns></returns>
-    private async Task CallEditName(string id, string username)
+    private async Task CallEditName(string username)
     {
         using var client = new HttpClient();
         var body = new
         {
-            id = id,
             username = username
 
         };
         var json = JsonConvert.SerializeObject(body);
         var data = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await client.PatchAsync("http://localhost:3000/users/update", data);
-
+        using var request = new HttpRequestMessage(HttpMethod.Patch, "http://api.instacfpt.info/users/update");
+        string token = await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "token");
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        request.Content = data;
+        var response = await client.SendAsync(request);
         if (response.IsSuccessStatusCode)
         {
-            Console.WriteLine(response.StatusCode);
-            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", username);
+            LoginModel loginModel = new LoginModel();
+            loginModel.UserName = editNameModel.NewName;
+            loginModel.Password = editNameModel.Password;
+            var res = await client.PostAsJsonAsync("http://api.instacfpt.info/login", loginModel);
+            if (res.IsSuccessStatusCode)
+            {
+                token = await res.Content.ReadAsStringAsync();
+                // connect the user
+
+                await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "token", token);
+            }
             MyNavigationManager.NavigateTo("/profile");
+        }
+        else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            await JSRuntime.InvokeVoidAsync("BlazorRemoveLocalStore", "token");
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "false");
+            MyNavigationManager.NavigateTo("/");
         }
         else
         {

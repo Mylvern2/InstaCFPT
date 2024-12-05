@@ -1,3 +1,4 @@
+import { HttpException, HttpStatus } from '@nestjs/common'
 import { ObjectId, MongoClient } from 'mongodb'
 import { mongoDataSource } from 'src/main'
 import { User } from 'src/models/user.model'
@@ -27,7 +28,7 @@ export class UserService {
   // get name of user by id
   async getUserName(userId: ObjectId): Promise<string> {
     const userRepo = mongoDataSource.getRepository(User);
-    const user = await userRepo.findOneBy({_id: userId})
+    const user = await userRepo.findOneBy({_id: new ObjectId(userId)})
     if (!user || !user.name)
       {
         return 'Deleted User'
@@ -37,20 +38,21 @@ export class UserService {
 
   async editName(userId: ObjectId, username: string) : Promise<boolean | User> {
     const userRepo = mongoDataSource.getRepository(User);
-    const user = await userRepo.findOneBy({_id: userId})
+    const user = await userRepo.findOneBy({_id: new ObjectId(userId)})
+    console.log(userId)
     if (!user || !user.name)
     {
-      return false;
+      throw new HttpException("User not found", HttpStatus.BAD_REQUEST);
     }
 
-    await userRepo.update({_id: userId}, {name: username});
+    await userRepo.update({_id: new ObjectId(userId)}, {name: username});
     return user;
   }
 
   async deleteUser(userId: ObjectId) : Promise<boolean>
   {
     const userRepo = mongoDataSource.getRepository(User);
-    const result = await userRepo.delete({_id: userId})
+    const result = await userRepo.delete({_id: new ObjectId(userId)})
     return result.affected > 0;
   }
 }

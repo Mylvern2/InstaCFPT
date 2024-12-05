@@ -29,30 +29,46 @@ export class PublicationController {
   @Post('add')
   @HttpCode(201)
   async add(@Body() body, @Req() request: Request): Promise<Publication> {
-    if (!this.loginService.verifyJWT(request))
+    const decoded = this.loginService.verifyJWT(request);
+    if (decoded === null)
     {
       throw new HttpException("Not Authentified", HttpStatus.UNAUTHORIZED)
     }
-    return this.publicationService.addPublication(body.title, body.author, body.image, body.base64)
+    return this.publicationService.addPublication(body.title, decoded.id, body.image, body.base64, body.content)
   }
 
   @Patch('editTitle')
-  async editTitle(@Body() body)
+  async editTitle(@Body() body, @Req() request: Request)
   {
+    const decoded = this.loginService.verifyJWT(request);
+    if (decoded === null)
+    {
+      throw new HttpException("Not Authentified", HttpStatus.UNAUTHORIZED)
+    }
     return this.publicationService.editTitle(body.id, body.title)
   }
 
   @Delete('delete/:id')
-  async deleteUser(@Param('id') id: string) : Promise<boolean>
+  async deleteUser(@Param('id') id: string, @Req() request: Request) : Promise<boolean>
   {
+    const decoded = this.loginService.verifyJWT(request);
+    if (decoded === null)
+    {
+      throw new HttpException("Not Authentified", HttpStatus.UNAUTHORIZED)
+    }
     const publicationId = new ObjectId(id);
     return this.publicationService.deletePublication(publicationId);
   }
 
   @Put('comment')
-  async addComment(@Body() body): Promise<Publication> {
+  async addComment(@Body() body, @Req() request: Request): Promise<Publication> {
+    const decoded = this.loginService.verifyJWT(request);
+    if (decoded === null)
+    {
+      throw new HttpException("Not Authentified", HttpStatus.UNAUTHORIZED)
+    }
     try {
-      return this.publicationService.addComment(body.publicationId, body.userId, body.text)
+      return this.publicationService.addComment(body.publicationId, decoded.id.id.toString(), body.text)
     } catch (error) {
       console.error('Error adding comment', error)
       throw error
@@ -67,8 +83,13 @@ export class PublicationController {
    * @returns  
    */
   @Patch('like')
-  async addLike(@Body() body): Promise<object> {
-    const likes = await this.publicationService.addLike(body.publicationId, body.userId)
+  async addLike(@Body() body, @Req() request: Request): Promise<object> {
+    const decoded = this.loginService.verifyJWT(request);
+    if (decoded === null)
+    {
+      throw new HttpException("Not Authentified", HttpStatus.UNAUTHORIZED)
+    }
+    const likes = await this.publicationService.addLike(body.publicationId, decoded.id.id.toString())
     return { "publicationId": body.publicationId, "likes": likes }
   }
 
@@ -80,8 +101,13 @@ export class PublicationController {
    * @returns  
    */
   @Patch('dislike')
-  async dislike(@Body() body): Promise<object> {
-    const likes = await this.publicationService.dislike(body.publicationId, body.userId)
+  async dislike(@Body() body, @Req() request: Request): Promise<object> {
+    const decoded = this.loginService.verifyJWT(request);
+    if (decoded === null)
+    {
+      throw new HttpException("Not Authentified", HttpStatus.UNAUTHORIZED)
+    }
+    const likes = await this.publicationService.dislike(body.publicationId, decoded.id)
     return { "publicationId": body.publicationId, "likes": likes }
   }
 }

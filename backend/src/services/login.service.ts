@@ -1,9 +1,11 @@
+import { ObjectId } from "mongodb";
+
 const jwt = require('jsonwebtoken');
 require('dotenv').config()
 
 export class LoginService {
 
-  verifyJWT(request: Request) : boolean
+  verifyJWT(request: Request) : {name:string, id:ObjectId, exp: number} | null
   {
     const token = request.headers["authorization"].replace('Bearer ', '');
     const secret = process.env.SECRET_KEY;
@@ -12,13 +14,13 @@ export class LoginService {
         const now = Date.now();
 
         if (now > decoded.exp)
-            return false;
-        return true;
+            return null;
+        return decoded;
     }
     catch(err)
     {
         console.log(err)
-        return false;
+        return null;
     }
   } 
 }

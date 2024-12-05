@@ -15,6 +15,8 @@ export class Publication {
   @Column()
   image: string
   @Column()
+  content: string
+  @Column()
   comments: Comment[]
   @Column()
   likes: ObjectId[]

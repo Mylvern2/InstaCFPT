@@ -34,15 +34,16 @@ export class PublicationService {
     return publications
   }
 
-  async addPublication(title: string, author: ObjectId, image: string, content : string): Promise<Publication> {
+  async addPublication(title: string, author: ObjectId, image: string, base64 : string, content: string): Promise<Publication> {
     const publicationRepo = mongoDataSource.getRepository(Publication)
     const publication = new Publication()
     publication.title = title
     publication.author = new ObjectId(author)
     publication.image = image
+    publication.content = content;
     publication.authorName = await this.getAuthorName(author)
 
-    const buffer = Buffer.from(content, 'base64');
+    const buffer = Buffer.from(base64, 'base64');
     const fd = fs.openSync(`images/${image}`, "w");
     const position = 0;
     fs.writeSync(fd, buffer, position)

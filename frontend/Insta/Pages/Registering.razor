@@ -64,8 +64,7 @@
 
         if (connected)
         {
-            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", "");
-            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "ID", "");
+            await JSRuntime.InvokeVoidAsync("BlazorRemoveLocalStore", "token");
             await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "false");
             MyNavigationManager.NavigateTo("/");
         }
@@ -76,7 +75,7 @@
     private async void HandleValidSubmit()
     {
         using var client = new HttpClient();
-        var response = await client.PostAsJsonAsync("http://localhost:3000/users/add", loginModel);
+        var response = await client.PostAsJsonAsync("http://api.instacfpt.info/users/add", loginModel);
         if (response.IsSuccessStatusCode)
         {
             success = "User created";

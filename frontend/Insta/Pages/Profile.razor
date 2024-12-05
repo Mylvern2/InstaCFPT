@@ -25,19 +25,21 @@ else
                     }
 
                                 <div class="card col-3 d-flex center customer-card">
-                                    <img class="card-img-top" src="http://localhost:3000/\@pub.Image" alt="@pub.Image">
+                                    <img class="card-img-top" src="http://api.instacfpt.info/\@pub.Image" alt="@pub.Image">
                                     <div class="card-body d-flex flex-column justify-content-between">
                                         <h2 class="card-title"><a href="/publication?id=@pub.Id" class="text-decoration-none text-reset">@pub.Title</a></h2>
                                         <h3 class="card-title text-muted"> @pub.AuthorName </h3>
-                                        <div>
-                                            <input type="text" @bind-value="updatedTitle">
-                                            <button class="btn btn-primary" @onclick="(() => { UpdateTitle(pub.Id);})">Edit publication title</button>
-                                        </div>
-                                        <button class="btn btn-primary" @onclick="(() => {DeletePublication(pub.Id);})">Delete publication</button>
+                                        
 
                                         
 
-                                        <p class="card-text"> Bienvenue dans un coin enchanté de l'internet, où la magie de la nature rencontre les mélodies de l'imagination. Dans notre monde, les frontières entre le réel et l'irréel s'estompent doucement, laissant place à un espace où tout devient possible..</p>
+                                        <p class="card-text">@pub.Content</p>
+
+                        <div>
+                            <input type="text" @bind-value="updatedTitle">
+                            <button class="btn btn-primary" @onclick="(() => { UpdateTitle(pub.Id);})">Edit publication title</button>
+                        </div>
+                        <button class="btn btn-primary" @onclick="(() => {DeletePublication(pub.Id);})">Delete publication</button>
 
                                         <p class="card-text text-center">
                                             <i class="bi bi-hand-thumbs-up-fill small">
@@ -80,7 +82,7 @@ else
     [Parameter]
     public bool DisplayAlert { get; set; }
     public List<PublicationModel> lstPublications = new List<PublicationModel>();
-    public UserModel User = new UserModel() { Id = "", Name = ""};
+    public UserModel User = new UserModel();
 
     public string comment = "";
     public string addCommentMsg = "";
@@ -97,11 +99,6 @@ else
             MyNavigationManager.NavigateTo("/");
         }
 
-        string username = await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "Username");
-        string id = await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "ID");
-        User.Id = id;
-        User.Name = username;
-
         await InitializePublications();
         StateHasChanged();
     }
@@ -112,7 +109,27 @@ else
     private async Task InitializePublications()
     {
         using var client = new HttpClient();
-        var response = await client.GetStringAsync("http://localhost:3000/publications");
+        using var request = new HttpRequestMessage(HttpMethod.Get, "http://api.instacfpt.info/login/username");
+        string token = await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "token");
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var res = await client.SendAsync(request);
+        if (res.IsSuccessStatusCode)
+        {
+            var reader = new StreamReader(res.Content.ReadAsStream());
+            string username = await reader.ReadToEndAsync();
+            User.Name = username;
+        }
+        else if (res.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            await JSRuntime.InvokeVoidAsync("BlazorRemoveLocalStore", "token");
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "false");
+            MyNavigationManager.Refresh();
+
+        }
+
+
+
+        var response = await client.GetStringAsync("http://api.instacfpt.info/publications");
         JArray publications = JArray.Parse(response);
         foreach (dynamic obj in publications)
         {
@@ -123,6 +140,7 @@ else
                     Author = obj["author"],
                     Image = obj["image"],
                     AuthorName = obj["authorName"],
+                    Content = obj["content"],
                     // attribuer à la propriété LikesCount la taille du tableau de la liste des likes de la réponse
                     LikesCount = obj["likes"].Count
 
@@ -140,23 +158,25 @@ else
         if (confirmed)
         {
             using var client = new HttpClient();
-            string id = await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "ID");
-            var response = await client.DeleteAsync($"http://localhost:3000/users/delete/{id}");
+            using var request = new HttpRequestMessage(HttpMethod.Delete, "http://api.instacfpt.info/users/delete");
+            string token = await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "token");
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var response = await client.SendAsync(request);
 
             if (response.IsSuccessStatusCode)
             {
-                var reader = new StreamReader(response.Content.ReadAsStream());
-                var content = await reader.ReadToEndAsync();
-                bool result = false;
-                bool.TryParse(content, out result);
-                if (result)
-                {
-                    await JSRuntime.InvokeVoidAsync("alert", "User deleted");
-                    await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "Username", "");
-                    await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "ID", "");
-                    await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "false");
-                    MyNavigationManager.NavigateTo("/");
-                }
+                await JSRuntime.InvokeVoidAsync("alert", "User deleted");
+                await JSRuntime.InvokeVoidAsync("BlazorRemoveLocalStore", "token");
+                await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "false");
+                MyNavigationManager.Refresh();
+
+
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                await JSRuntime.InvokeVoidAsync("BlazorRemoveLocalStore", "token");
+                await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "false");
+                MyNavigationManager.Refresh();
 
             }
 
@@ -176,11 +196,21 @@ else
         if (confirmed)
         {
             using var client = new HttpClient();
-            var response = await client.DeleteAsync($"http://localhost:3000/publications/delete/{id}");
+            using var request = new HttpRequestMessage(HttpMethod.Delete, $"http://api.instacfpt.info/publications/delete/{id}");
+            string token = await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "token");
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var response = await client.SendAsync(request);
 
             if (response.IsSuccessStatusCode)
             {
                 await JSRuntime.InvokeVoidAsync("alert", "Publication deleted");
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                await JSRuntime.InvokeVoidAsync("BlazorRemoveLocalStore", "token");
+                await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "false");
+                MyNavigationManager.Refresh();
+
             }
 
 
@@ -200,18 +230,28 @@ else
             return;
         }
         using var client = new HttpClient();
+        using var request = new HttpRequestMessage(HttpMethod.Patch, "http://api.instacfpt.info/publications/editTitle");
+
         var body = new
         {
             id = id,
             title = updatedTitle
 
         };
-        var json = JsonConvert.SerializeObject(body);
-        var data = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await client.PatchAsync("http://localhost:3000/publications/editTitle", data);
+
+        string token = await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "token");
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        request.Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
+        var response = await client.SendAsync(request);
         if (response.IsSuccessStatusCode)
         {
             await JSRuntime.InvokeVoidAsync("alert", "Post updated!");
+        }
+        else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            await JSRuntime.InvokeVoidAsync("BlazorRemoveLocalStore", "token");
+            await JSRuntime.InvokeVoidAsync("BlazorSetLocalStore", "IsConnected", "false");
+            MyNavigationManager.Refresh();
         }
 
     }

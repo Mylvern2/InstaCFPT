@@ -28,19 +28,31 @@ services:
     build:
       context: ./backend/
     container_name: backend
-    ports:
-      - 3000:3000
     volumes: 
       - ./backend/images:/app/images
       - ./backend/node_modules:/app/node_modules
       - ./backend/src:/app/src
     depends_on:
       - mongo
+    labels:
+      - "traefik.http.routers.api.rule=Host(`api.instacfpt.info`)"
 
   frontend:
     build:
       context: ./frontend/Insta/
       dockerfile: Dockerfile
     container_name: frontend
-    ports: 
-      - 80:80
+    labels:
+      - "traefik.http.routers.web.rule=Host(`instacfpt.info`)"
+
+  traefik:
+    image: traefik:v3.2
+    command: --api.insecure=true --providers.docker
+    container_name: traefik
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      
+    
