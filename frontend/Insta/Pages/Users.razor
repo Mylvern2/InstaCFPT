@@ -49,7 +49,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         using var client = new HttpClient();
-        var response = await client.GetStringAsync("http://theo.api.cfpt.info/users");
+        var response = await client.GetStringAsync("http://api.theo.cfpt.info/users");
         JArray users = JArray.Parse(response);
         // Get all users and add them to a list
         foreach (dynamic obj in users)

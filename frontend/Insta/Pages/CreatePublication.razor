@@ -135,7 +135,7 @@
     {
         using var client = new HttpClient();
         var pub = new Publication() { Title = publicationModel.Title, Author = "Some random author (test data)", Image = publicationModel.Image, Base64 = base64, Content = publicationModel.Content};
-        using var request = new HttpRequestMessage(HttpMethod.Post, "http://theo.api.cfpt.info/publications/add");
+        using var request = new HttpRequestMessage(HttpMethod.Post, "http://api.theo.cfpt.info/publications/add");
         string token = await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "token");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         request.Content = new StringContent(JsonConvert.SerializeObject(pub), Encoding.UTF8, "application/json");

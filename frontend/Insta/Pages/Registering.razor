@@ -75,7 +75,7 @@
     private async void HandleValidSubmit()
     {
         using var client = new HttpClient();
-        var response = await client.PostAsJsonAsync("http://theo.api.cfpt.info/users/add", loginModel);
+        var response = await client.PostAsJsonAsync("http://api.theo.cfpt.info/users/add", loginModel);
         if (response.IsSuccessStatusCode)
         {
             success = "User created";

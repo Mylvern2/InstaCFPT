@@ -35,7 +35,7 @@ services:
     depends_on:
       - mongo
     labels:
-      - "traefik.http.routers.api.rule=Host(`theo.api.cfpt.info`)"
+      - "traefik.http.routers.api.rule=Host(`api.theo.cfpt.info`)"
 
   frontend:
     build:
@@ -43,7 +43,7 @@ services:
       dockerfile: Dockerfile
     container_name: frontend
     labels:
-      - "traefik.http.routers.web.rule=Host(`theo.insta.cfpt.info`)"
+      - "traefik.http.routers.web.rule=Host(`theo.cfpt.info`)"
 
   traefik:
     image: traefik:v3.2
