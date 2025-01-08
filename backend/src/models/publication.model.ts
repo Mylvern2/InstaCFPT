@@ -66,6 +66,9 @@ export class Publication {
    * 
    */
   dislike(user: ObjectId): Publication {
+    // Missing an if clause to check for if likes is undefined.
+
+
     const size = this.likes.length;
     // Convert user ObjectId to string for comparison
     const userStr = user.toString();

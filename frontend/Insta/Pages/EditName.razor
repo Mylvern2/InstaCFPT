@@ -69,7 +69,7 @@
     private async void HandleValidSubmit()
     {
         using var client = new HttpClient();
-        var response = await client.GetStringAsync("http://api.instacfpt.info/users");
+        var response = await client.GetStringAsync("http://theo.api.cfpt.info/users");
         JArray users = JArray.Parse(response);
 
         foreach (dynamic user in users)
@@ -104,7 +104,7 @@
         };
         var json = JsonConvert.SerializeObject(body);
         var data = new StringContent(json, Encoding.UTF8, "application/json");
-        using var request = new HttpRequestMessage(HttpMethod.Patch, "http://api.instacfpt.info/users/update");
+        using var request = new HttpRequestMessage(HttpMethod.Patch, "http://theo.api.cfpt.info/users/update");
         string token = await JSRuntime.InvokeAsync<string>("BlazorGetLocalStore", "token");
         request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         request.Content = data;
@@ -114,7 +114,7 @@
             LoginModel loginModel = new LoginModel();
             loginModel.UserName = editNameModel.NewName;
             loginModel.Password = editNameModel.Password;
-            var res = await client.PostAsJsonAsync("http://api.instacfpt.info/login", loginModel);
+            var res = await client.PostAsJsonAsync("http://theo.api.cfpt.info/login", loginModel);
             if (res.IsSuccessStatusCode)
             {
                 token = await res.Content.ReadAsStringAsync();

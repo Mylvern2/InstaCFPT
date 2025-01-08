@@ -68,6 +68,8 @@ export class PublicationController {
       throw new HttpException("Not Authentified", HttpStatus.UNAUTHORIZED)
     }
     try {
+      // !!! Can't modify after last release.
+      // Replacing 'decoded.id.id.toString()' for 'decoded.id.toString()' fixes the undefined bug.
       return this.publicationService.addComment(body.publicationId, decoded.id.id.toString(), body.text)
     } catch (error) {
       console.error('Error adding comment', error)
@@ -89,6 +91,9 @@ export class PublicationController {
     {
       throw new HttpException("Not Authentified", HttpStatus.UNAUTHORIZED)
     }
+
+    // !!! Can't modify after last release.
+    // Replacing 'decoded.id.id.toString()' for 'decoded.id.toString()' fixes the undefined bug.
     const likes = await this.publicationService.addLike(body.publicationId, decoded.id.id.toString())
     return { "publicationId": body.publicationId, "likes": likes }
   }

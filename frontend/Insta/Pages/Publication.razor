@@ -11,7 +11,7 @@
     @if (pub != null)
     {
                 <div class="card d-flex center customer-card">
-                                <img class="card-img-top" src="http://api.instacfpt.info/@pub.Image" alt="@pub.Image">
+                                <img class="card-img-top" src="http://theo.api.cfpt.info/@pub.Image" alt="@pub.Image">
                                 <div class="card-body d-flex flex-column justify-content-between">
                                     <h2 class="card-title"><a href="/publication?id=@pub.Id" class="text-decoration-none text-reset">@pub.Title</a></h2>
                                     <h3 class="card-title text-muted"> @pub.AuthorName </h3>
@@ -49,7 +49,7 @@
     {
         // Get all publications
         using var client = new HttpClient();
-        var response = await client.GetStringAsync("http://api.instacfpt.info/publications");
+        var response = await client.GetStringAsync("http://theo.api.cfpt.info/publications");
         JArray publications = JArray.Parse(response);
         // Get the id in the URL
         var URI = new UriBuilder(MyNavigationManager.Uri);
